@@ -11,7 +11,7 @@ Note, nmap logs should be in Greppable Format (-oG)
 Requirements: nmap, ruby, openssl (s_client)
 
 Example:
-  sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.txt 192.168.50.0/24
+  sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.log 192.168.50.0/24
   ruby ./drownmap.rb ssl-net*.log | tee results-net50.txt
 {quote}
 
