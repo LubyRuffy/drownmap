@@ -22,3 +22,16 @@ Usage: drownmap [options] [FILE(S)]...
     -h, --help                       Prints this help
     -v, --version                    Prints version
 ```
+
+Output format example:
+```
+{"vuln"=>false, "conn"=>"192.168.1.132:443", "name"=>"site1.example.com", "cert"=>[]}
+{"vuln"=>true, "conn"=>"192.168.1.133:443", "name"=>"site2.example.com", "cert"=>["subject=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=Web Services/CN=Example/emailAddress=support@example.com\n", "issuer=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=CA Services/CN=Example/emailAddress=support@example.com\n"]}
+
+Where:
+
+vuln=> If server responded to SSLv2 and is vulnerable
+conn=> IP:port connected to
+name=> DNS name if available
+cert=> Cert in use on server if vulnerable.
+```
