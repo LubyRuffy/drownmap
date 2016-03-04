@@ -4,6 +4,8 @@ Security tool, scan your environments for the SSLv2 DROWN vulnerability.
 
 DrownMap is designed for testing large volumes of internal (or external) network services that employ SSL/TLS for encryption. The aim is a tool that can test entire networks in an automated fashion, producing a report of all vulnerable hosts and their services. A list of potentially compromised (primary) certificates is also returned. Coupled with nmap this can be done even without a prior list of which servers and active network devices you need to test. For webservers and the like serving multiple domains, remember to consider all of their virtualhosts and multiple certificates also.
 
+StartTLS protocols supported with latest OpenSSL: ftp, smtp, pop3, imap, xmpp
+
 Requirements: Linux, nmap, ruby, openssl (s_client)
 
 ```
@@ -16,13 +18,14 @@ Note, nmap logs should be in Greppable Format (-oG)
 Requirements: nmap, ruby, openssl (s_client)
 
 Example:
-  sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.log 192.168.50.0/24
+  sudo nmap -Pn -sT -p 21,25,110,143,443,465,587,636,993,995,5222,8443 --open -oG ssl-net50.log 192.168.50.0/24
   ruby ./drownmap.rb ssl-net*.log | tee results-net50.txt
 
-Examples results will be displayed, and written to results-net50.txt file.
+Examples results will be displayed, and written to results-net50.txt file
 
 Usage: drownmap [options] [FILE(S)]...
     -d, --delay=SECONDS              Delay between SSL connections (Decimal, default=0.01)
+    -t, --timeout=SECONDS            Time to wait for SSL handshake (Decimal, default=5.0)
     -h, --help                       Prints this help
     -v, --version                    Prints version
 ```
