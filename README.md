@@ -2,7 +2,7 @@
 
 Security tool, scan your environments for the SSLv2 DROWN vulnerability.
 
-DrownMap is designed for testing large volumes of internal (or external) network services that employ SSL/TLS for encryption. The aim is a tool that can test entire networks in an automated fashion, producing a report of all vulnerable hosts and their services. A list of potentially compromised certificates is also returned. Coupled with nmap this can be done even without a prior list of which servers and active network devices you need to test. For webservers, etc serving multiple domains remember to consider all of their virtualhosts also.
+DrownMap is designed for testing large volumes of internal (or external) network services that employ SSL/TLS for encryption. The aim is a tool that can test entire networks in an automated fashion, producing a report of all vulnerable hosts and their services. A list of potentially compromised certificates is also returned. Coupled with nmap this can be done even without a prior list of which servers and active network devices you need to test. For webservers and the like serving multiple domains, remember to consider all of their virtualhosts also.
 
 ```
 DrownMap / Ymon Oy / www.ymon.fi, info@ymon.fi
