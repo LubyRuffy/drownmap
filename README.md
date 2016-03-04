@@ -19,7 +19,7 @@ Example:
   sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.log 192.168.50.0/24
   ruby ./drownmap.rb ssl-net*.log | tee results-net50.txt
 
-Examples results will be displayed, and written to results-net50.txt file.", ""
+Examples results will be displayed, and written to results-net50.txt file.
 
 Usage: drownmap [options] [FILE(S)]...
     -d, --delay=SECONDS              Delay between SSL connections (Decimal, default=0.01)
@@ -29,8 +29,8 @@ Usage: drownmap [options] [FILE(S)]...
 
 Output format example:
 ```
-{"vuln"=>false, "conn"=>"192.168.1.132:443", "name"=>"site1.example.com", "cert"=>[]}
-{"vuln"=>true, "conn"=>"192.168.1.133:443", "name"=>"site2.example.com", "cert"=>["subject=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=Web Services/CN=Example/emailAddress=support@example.com\n", "issuer=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=CA Services/CN=Example/emailAddress=support@example.com\n"]}
+{"vuln"=>false, "conn"=>"192.168.50.132:443", "name"=>"site1.example.com", "cert"=>[]}
+{"vuln"=>true, "conn"=>"192.168.50.133:443", "name"=>"site2.example.com", "cert"=>["subject=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=Web Services/CN=Example/emailAddress=support@example.com\n", "issuer=/C=FI/ST=Uusimaa/L=Helsinki/O=Example Inc./OU=CA Services/CN=Example/emailAddress=support@example.com\n"]}
 
 Where:
 

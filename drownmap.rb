@@ -35,7 +35,7 @@ Example:
   sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.log 192.168.50.0/24
   ruby #{$0} ssl-net*.log | tee results-net50.txt
 
-Examples results will be displayed, and written to results-net50.txt file.", ""
+Examples results will be displayed, and written to results-net50.txt file
 
 END
 exit(1)
