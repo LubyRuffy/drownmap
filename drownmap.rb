@@ -14,9 +14,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-ver = "1.0.1"
+ver = "1.0.2"
 
 # Reads NMAP regexp format, uses openssl s_client to check for SSLv2 support.
+# Supports StartTLS for smtp, pop3, imap, ftp, xmpp if OpenSSL version recent.
 
 require 'timeout'
 require 'open3'
@@ -32,7 +33,7 @@ Note, nmap logs should be in Greppable Format (-oG)
 Requirements: nmap, ruby, openssl (s_client)
 
 Example:
-  sudo nmap -Pn -sT -p 443,465,587,636,993,995,8443 --open -oG ssl-net50.log 192.168.50.0/24
+  sudo nmap -Pn -sT -p 21,25,110,143,443,465,587,636,993,995,5222,8443 --open -oG ssl-net50.log 192.168.50.0/24
   ruby #{$0} ssl-net*.log | tee results-net50.txt
 
 Examples results will be displayed, and written to results-net50.txt file
@@ -41,9 +42,10 @@ END
 exit(1)
 end
 
-options = {:delay=>0.01}
+options = {:delay=>0.01, :timeout=>5.0}
 OptionParser.new do |opts|
   opts.on('-d', '--delay=SECONDS', Float, 'Delay between SSL connections (Decimal, default=0.01)') { |s| options[:delay] = s }
+  opts.on('-t', '--timeout=SECONDS', Float, 'Time to wait for SSL handshake (Decimal, default=5.0)') { |s| options[:timeout] = s }
   opts.on('-h', '--help', 'Prints this help') { $stderr.puts help(), opts }
   opts.on('-v', '--version', 'Prints version') { $stderr.puts "DrownMap version #{ver}."; exit(1) }
   opts.on('FILE(S)') {}
@@ -56,6 +58,8 @@ end.parse!
 
 class DrownMap
   def initialize(options)
+    @starttls_ports = {21=>'ftp', 25=>'smtp', 110=>'pop3', 143=>'imap', 5222=>'xmpp'}
+    @starttls_excludes = '-no_tls1_2 -no_tls1_1 -no_tls1 -no_ssl3'
     @options = options
   end
 
@@ -73,12 +77,15 @@ class DrownMap
       ssl2 = "error" # Vulnerable? Default to error
       cert = ""
       begin
-        Timeout::timeout(5) {
-          stdin, stdout, stderr, wait_thr = Open3.popen3('openssl', 's_client', '-ssl2', '-connect', "#{conn['ip']}:#{conn['port']}");
+        starttls_proto = @starttls_ports.fetch(conn['port'].to_i, nil) 
+        args = starttls_proto != nil ? "-starttls #{starttls_proto} #{@starttls_excludes}" : '-ssl2' 
+        Timeout::timeout(@options[:timeout]) {
+          stdin, stdout, stderr, wait_thr = Open3.popen3("openssl s_client -connect #{conn['ip']}:#{conn['port']} " + args);
           stdin.close
           cert = stdout.each_line.select { |line| /^(subject=|issuer=)/.match(line) }
           stdout.close; stderr.close
-          ssl2 = wait_thr.value.exitstatus == 0 ? true : false;
+          ssl2 = wait_thr.value.exitstatus == 0 ? true : false
+          ssl2 = 'error' if ssl2 == true && cert.empty?
         }
       rescue Timeout::Error
         ssl2 = "timeout"
