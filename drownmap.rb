@@ -85,11 +85,11 @@ class DrownMap
           cert = stdout.each_line.select { |line| /^(subject=|issuer=)/.match(line) }
           stdout.close; stderr.close
           ssl2 = wait_thr.value.exitstatus == 0 ? true : false
-          ssl2 = 'error' if ssl2 == true && cert.empty?
         }
       rescue Timeout::Error
         ssl2 = "timeout"
       end
+      ssl2 = 'error' if ssl2 == true && cert.empty?
       sleep(@options[:delay])
       {'vuln' => ssl2, 'conn' => "#{conn['ip']}:#{conn['port']}", 'name' => conn['name'], 'cert' => cert}
     }
