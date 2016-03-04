@@ -45,7 +45,7 @@ options = {:delay=>0.01}
 OptionParser.new do |opts|
   opts.on('-d', '--delay=SECONDS', Float, 'Delay between SSL connections (Decimal, default=0.01)') { |s| options[:delay] = s }
   opts.on('-h', '--help', 'Prints this help') { $stderr.puts help(), opts }
-  opts.on('-v', '--version', 'Prints version') { $stderr.puts "DrownMap version 1.0."; exit(1) }
+  opts.on('-v', '--version', 'Prints version') { $stderr.puts "DrownMap version #{ver}."; exit(1) }
   opts.on('FILE(S)') {}
 
   if ARGV.empty?
