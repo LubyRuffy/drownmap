@@ -14,7 +14,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-ver = 1.0
+ver = "1.0.1"
 
 # Reads NMAP regexp format, uses openssl s_client to check for SSLv2 support.
 
@@ -54,33 +54,47 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-ARGV.each do |f|
-  handle = File.open(f)
-  puts handle.each_line.select { |line| /^Host:.*(?=Ports:)Ports:/.match(line) }
-  .inject([]) { |acc,line| 
-    ip, name = /^Host: (.*?) \((.*?)\)/.match(line)[1..2]
-    line.scan(/(\d+)\/open/).each { |port|
-      acc += [{'ip' => ip, 'name' => name, 'port' => port[0]}]
-    }
-    acc
-  }
-  .map { |conn|
-    $stderr.puts "# Processing #{conn['ip']}:#{conn['port']} (#{conn['name']})"
-    ssl2 = "error" # Vulnerable? Default to error
-    cert = ""
-    begin
-      Timeout::timeout(5) {
-        stdin, stdout, stderr, wait_thr = Open3.popen3('openssl', 's_client', '-ssl2', '-connect', "#{conn['ip']}:#{conn['port']}");
-        stdin.close
-        cert = stdout.each_line.select { |line| /^(subject=|issuer=)/.match(line) }
-        stdout.close; stderr.close
-        ssl2 = wait_thr.value.exitstatus == 0 ? true : false;
+class DrownMap
+  def initialize(options)
+    @options = options
+  end
+
+  def process(handle)
+    return handle.each_line.select { |line| /^Host:.*(?=Ports:)Ports:/.match(line) }
+    .inject([]) { |acc,line| 
+      ip, name = /^Host: (.*?) \((.*?)\)/.match(line)[1..2]
+      line.scan(/(\d+)\/open/).each { |port|
+        acc += [{'ip' => ip, 'name' => name, 'port' => port[0]}]
       }
-    rescue Timeout::Error
-      ssl2 = "timeout"
-    end
-    sleep(options[:delay])
-    {'vuln' => ssl2, 'conn' => "#{conn['ip']}:#{conn['port']}", 'name' => conn['name'], 'cert' => cert}
-  }
-  .sort_by { |h| h['vuln'] == false ? 0 : 1 }
+      acc
+    }
+    .map { |conn|
+      $stderr.puts "# Processing #{conn['ip']}:#{conn['port']} (#{conn['name']})"
+      ssl2 = "error" # Vulnerable? Default to error
+      cert = ""
+      begin
+        Timeout::timeout(5) {
+          stdin, stdout, stderr, wait_thr = Open3.popen3('openssl', 's_client', '-ssl2', '-connect', "#{conn['ip']}:#{conn['port']}");
+          stdin.close
+          cert = stdout.each_line.select { |line| /^(subject=|issuer=)/.match(line) }
+          stdout.close; stderr.close
+          ssl2 = wait_thr.value.exitstatus == 0 ? true : false;
+        }
+      rescue Timeout::Error
+        ssl2 = "timeout"
+      end
+      sleep(@options[:delay])
+      {'vuln' => ssl2, 'conn' => "#{conn['ip']}:#{conn['port']}", 'name' => conn['name'], 'cert' => cert}
+    }
+  end
 end
+
+mapper = DrownMap.new(options)
+
+puts ARGV.inject([]) { |acc, f| 
+  handle = File.open(f)
+  acc += mapper.process(handle)
+  handle.close
+  acc
+}
+.sort_by { |h| h['vuln'] == false ? 0 : 1 }
