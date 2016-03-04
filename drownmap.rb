@@ -59,8 +59,8 @@ ARGV.each do |f|
   puts handle.each_line.select { |line| /^Host:.*(?=Ports:)Ports:/.match(line) }
   .inject([]) { |acc,line| 
     ip, name = /^Host: (.*?) \((.*?)\)/.match(line)[1..2]
-    line.scan(/(\d+)\/open/)[0].each { |port|
-      acc += [{'ip' => ip, 'name' => name, 'port' => port}]
+    line.scan(/(\d+)\/open/).each { |port|
+      acc += [{'ip' => ip, 'name' => name, 'port' => port[0]}]
     }
     acc
   }
